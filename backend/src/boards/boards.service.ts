@@ -204,6 +204,13 @@ export class BoardsService {
     return task;
   }
 
+  async getTaskById(taskId: string) {
+    return this.taskRepo.findOne({
+      where: { id: taskId },
+      relations: ['column', 'column.board'],
+    });
+  }
+
   async updateTask(taskId: string, dto: UpdateTaskDto, userId: string) {
     const task = await this.taskRepo.findOne({ where: { id: taskId } });
     if (!task) throw new NotFoundException('Task not found');
