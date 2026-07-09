@@ -16,6 +16,10 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { WorkspaceRole } from '../workspaces/workspace-member.entity';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditAction, AuditEntityType } from '../audit-log/audit-log.entity';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/notifications.entity';
 
 @Injectable()
 export class BoardsService {
@@ -31,6 +35,8 @@ export class BoardsService {
     @InjectRepository(TaskLabel)
     private taskLabelRepo: Repository<TaskLabel>,
     private workspacesService: WorkspacesService,
+    private auditLogService: AuditLogService,
+    private notificationsService: NotificationsService,
   ) {}
 
   // ─── Boards ───────────────────────────────────────────────
@@ -45,6 +51,15 @@ export class BoardsService {
     });
 
     const saved = await this.boardRepo.save(board);
+
+    await this.auditLogService.log({
+      workspace_id: dto.workspace_id,
+      actor_id: userId,
+      action: AuditAction.BOARD_CREATED,
+      entity_type: AuditEntityType.BOARD,
+      entity_id: saved.id,
+      metadata: { name: dto.name },
+    });
 
     // Create default columns automatically
     await this.columnRepo.save([
@@ -98,6 +113,16 @@ export class BoardsService {
     ]);
 
     await this.boardRepo.delete(boardId);
+
+    await this.auditLogService.log({
+      workspace_id: board.workspace_id,
+      actor_id: userId,
+      action: AuditAction.BOARD_DELETED,
+      entity_type: AuditEntityType.BOARD,
+      entity_id: boardId,
+      metadata: { name: board.name },
+    });
+
     return { message: 'Board deleted' };
   }
 
@@ -116,12 +141,23 @@ export class BoardsService {
 
     const position = lastColumn ? lastColumn.position + 1000 : 1000;
 
-    return this.columnRepo.save({
+    const saved = await this.columnRepo.save({
       board_id: boardId,
       name: dto.name,
       color: dto.color,
       position,
     });
+
+    await this.auditLogService.log({
+      workspace_id: board.workspace_id,
+      actor_id: userId,
+      action: AuditAction.COLUMN_CREATED,
+      entity_type: AuditEntityType.COLUMN,
+      entity_id: saved.id,
+      metadata: { name: dto.name },
+    });
+
+    return saved;
   }
 
   async updateColumn(
@@ -149,6 +185,16 @@ export class BoardsService {
 
     await this.requireWorkspaceMember(column.board.workspace_id, userId);
     await this.columnRepo.delete(columnId);
+
+    await this.auditLogService.log({
+      workspace_id: column.board.workspace_id,
+      actor_id: userId,
+      action: AuditAction.COLUMN_DELETED,
+      entity_type: AuditEntityType.COLUMN,
+      entity_id: columnId,
+      metadata: { name: column.name },
+    });
+
     return { message: 'Column deleted' };
   }
 
@@ -190,7 +236,18 @@ export class BoardsService {
       position,
     });
 
-    return this.taskRepo.save(task);
+    const saved = await this.taskRepo.save(task);
+
+    await this.auditLogService.log({
+      workspace_id: dto.workspace_id,
+      actor_id: userId,
+      action: AuditAction.TASK_CREATED,
+      entity_type: AuditEntityType.TASK,
+      entity_id: saved.id,
+      metadata: { title: dto.title, column_id: dto.column_id },
+    });
+
+    return saved;
   }
 
   async getTask(taskId: string, userId: string) {
@@ -217,6 +274,38 @@ export class BoardsService {
 
     await this.requireWorkspaceMember(task.workspace_id, userId);
     await this.taskRepo.update(taskId, dto);
+
+    await this.auditLogService.log({
+      workspace_id: task.workspace_id,
+      actor_id: userId,
+      action: AuditAction.TASK_UPDATED,
+      entity_type: AuditEntityType.TASK,
+      entity_id: taskId,
+      metadata: { changes: dto },
+    });
+
+    if (dto.assigned_to && dto.assigned_to !== task.assigned_to) {
+      await this.auditLogService.log({
+        workspace_id: task.workspace_id,
+        actor_id: userId,
+        action: AuditAction.TASK_ASSIGNED,
+        entity_type: AuditEntityType.TASK,
+        entity_id: taskId,
+        metadata: {
+          assigned_to: dto.assigned_to,
+          previously: task.assigned_to ?? 'unassigned',
+        },
+      });
+
+      await this.notificationsService.create({
+        recipient_id: dto.assigned_to,
+        type: NotificationType.ASSIGNED,
+        title: 'You were assigned a task',
+        body: `You have been assigned to "${task.title}"`,
+        link: `/tasks/${taskId}`,
+      });
+    }
+
     return this.getTask(taskId, userId);
   }
 
@@ -226,6 +315,16 @@ export class BoardsService {
 
     await this.requireWorkspaceMember(task.workspace_id, userId);
     await this.taskRepo.softDelete(taskId);
+
+    await this.auditLogService.log({
+      workspace_id: task.workspace_id,
+      actor_id: userId,
+      action: AuditAction.TASK_DELETED,
+      entity_type: AuditEntityType.TASK,
+      entity_id: taskId,
+      metadata: { title: task.title },
+    });
+
     return { message: 'Task deleted' };
   }
 
@@ -243,6 +342,18 @@ export class BoardsService {
     await this.taskRepo.update(taskId, {
       column_id: columnId,
       position,
+    });
+
+    await this.auditLogService.log({
+      workspace_id: task.workspace_id,
+      actor_id: userId,
+      action: AuditAction.TASK_MOVED,
+      entity_type: AuditEntityType.TASK,
+      entity_id: taskId,
+      metadata: {
+        from_column: task.column_id,
+        to_column: columnId,
+      },
     });
 
     return this.getTask(taskId, userId);
