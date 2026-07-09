@@ -6,6 +6,8 @@ import { UsersModule } from './users/users.module';
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { BoardsModule } from './boards/boards.module';
 import { CommentsModule } from './comments/comments.module';
+import { AuditLogModule } from './audit-log/audit-log.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { CommentsModule } from './comments/comments.module';
     WorkspacesModule,
     BoardsModule,
     CommentsModule,
+    AuditLogModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
