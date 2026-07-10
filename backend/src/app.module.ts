@@ -8,6 +8,8 @@ import { BoardsModule } from './boards/boards.module';
 import { CommentsModule } from './comments/comments.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -32,7 +34,9 @@ import { NotificationsModule } from './notifications/notifications.module';
     BoardsModule,
     CommentsModule,
     AuditLogModule,
+    ScheduleModule.forRoot(),
     NotificationsModule,
+    GatewayModule,
   ],
 })
 export class AppModule {}
