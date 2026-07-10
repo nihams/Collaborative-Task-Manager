@@ -14,17 +14,27 @@ export interface CreateNotificationDto {
 
 @Injectable()
 export class NotificationsService {
+  private gateway: any;
+
   constructor(
     @InjectRepository(Notification)
     private notificationRepo: Repository<Notification>,
   ) {}
+
+  setGateway(gateway: any) {
+    this.gateway = gateway;
+  }
 
   @Cron(CronExpression.EVERY_DAY_AT_9AM)
   async sendDeadlineNotifications() {}
 
   async create(dto: CreateNotificationDto): Promise<Notification> {
     const notification = this.notificationRepo.create(dto);
-    return this.notificationRepo.save(notification);
+    const saved = await this.notificationRepo.save(notification);
+    if (this.gateway) {
+      this.gateway.sendNotificationToUser(dto.recipient_id, saved);
+    }
+    return saved;
   }
 
   async findForUser(userId: string) {
