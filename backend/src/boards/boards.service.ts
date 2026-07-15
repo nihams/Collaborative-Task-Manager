@@ -90,6 +90,14 @@ export class BoardsService {
     return board;
   }
 
+  async getBoardsForWorkspace(workspaceId: string, userId: string) {
+    await this.requireWorkspaceMember(workspaceId, userId);
+    return this.boardRepo.find({
+      where: { workspace_id: workspaceId },
+      order: { created_at: 'ASC' },
+    });
+  }
+
   async updateBoard(boardId: string, name: string, userId: string) {
     const board = await this.boardRepo.findOne({ where: { id: boardId } });
     if (!board) throw new NotFoundException('Board not found');

@@ -39,6 +39,14 @@ export class BoardsController {
     return this.boardsService.getBoard(id, req.user.id);
   }
 
+  @Get('workspaces/:id/boards')
+  getBoardsForWorkspace(
+    @Param('id') workspaceId: string,
+    @Req() req: Request & { user: User },
+  ) {
+    return this.boardsService.getBoardsForWorkspace(workspaceId, req.user.id);
+  }
+
   @Patch('boards/:id')
   updateBoard(
     @Param('id') id: string,
