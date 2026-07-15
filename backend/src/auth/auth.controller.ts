@@ -1,6 +1,16 @@
-import { Controller, Post, Body, Res, Req, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  Req,
+  HttpCode,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt.guard';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -48,6 +58,13 @@ export class AuthController {
     await this.authService.logout(token);
     res.clearCookie('refresh_token');
     return { message: 'Logged out' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getMe(@Req() req: Request & { user: any }) {
+    const { password_hash, ...user } = req.user;
+    return user;
   }
 
   private setRefreshCookie(res: Response, token: string) {
