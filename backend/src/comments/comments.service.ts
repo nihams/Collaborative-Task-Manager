@@ -10,6 +10,8 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { WorkspacesService } from '../workspaces/workspaces.service';
 import { BoardsService } from '../boards/boards.service';
 import { WorkspaceRole } from '../workspaces/workspace-member.entity';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditAction, AuditEntityType } from '../audit-log/audit-log.entity';
 
 @Injectable()
 export class CommentsService {
@@ -18,6 +20,7 @@ export class CommentsService {
     private commentRepo: Repository<Comment>,
     private workspacesService: WorkspacesService,
     private boardsService: BoardsService,
+    private auditLogService: AuditLogService,
   ) {}
 
   async create(taskId: string, dto: CreateCommentDto, userId: string) {
@@ -95,6 +98,16 @@ export class CommentsService {
     }
 
     await this.commentRepo.delete(commentId);
+
+    await this.auditLogService.log({
+      workspace_id: comment.task.workspace_id,
+      actor_id: userId,
+      action: AuditAction.COMMENT_DELETED,
+      entity_type: AuditEntityType.COMMENT,
+      entity_id: commentId,
+      metadata: { task_id: comment.task_id },
+    });
+
     return { message: 'Comment deleted' };
   }
 }

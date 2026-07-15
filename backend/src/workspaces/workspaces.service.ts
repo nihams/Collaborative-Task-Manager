@@ -11,6 +11,8 @@ import { WorkspaceMember, WorkspaceRole } from './workspace-member.entity';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { UsersService } from '../users/users.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
+import { AuditAction, AuditEntityType } from '../audit-log/audit-log.entity';
 
 @Injectable()
 export class WorkspacesService {
@@ -20,6 +22,7 @@ export class WorkspacesService {
     @InjectRepository(WorkspaceMember)
     private memberRepo: Repository<WorkspaceMember>,
     private usersService: UsersService,
+    private auditLogService: AuditLogService,
   ) {}
 
   private generateSlug(name: string): string {
@@ -119,11 +122,20 @@ export class WorkspacesService {
     });
     if (existing) throw new ConflictException('User is already a member');
 
-    return this.memberRepo.save({
+    const saved = await this.memberRepo.save({
       workspace_id: workspaceId,
       user_id: user.id,
       role,
     });
+    await this.auditLogService.log({
+      workspace_id: workspaceId,
+      actor_id: requestingUserId,
+      action: AuditAction.MEMBER_ADDED,
+      entity_type: AuditEntityType.MEMBER,
+      entity_id: user.id,
+      metadata: { email, role },
+    });
+    return saved;
   }
 
   async updateMemberRole(
@@ -141,6 +153,14 @@ export class WorkspacesService {
       { role },
     );
 
+    await this.auditLogService.log({
+      workspace_id: workspaceId,
+      actor_id: requestingUserId,
+      action: AuditAction.MEMBER_ROLE_CHANGED,
+      entity_type: AuditEntityType.MEMBER,
+      entity_id: targetUserId,
+      metadata: { newRole: role },
+    });
     return { message: 'Role updated' };
   }
 
@@ -159,6 +179,14 @@ export class WorkspacesService {
       user_id: targetUserId,
     });
 
+    await this.auditLogService.log({
+      workspace_id: workspaceId,
+      actor_id: requestingUserId,
+      action: AuditAction.MEMBER_REMOVED,
+      entity_type: AuditEntityType.MEMBER,
+      entity_id: targetUserId,
+      metadata: {},
+    });
     return { message: 'Member removed' };
   }
 
