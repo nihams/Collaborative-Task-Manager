@@ -419,6 +419,14 @@ export class BoardsService {
     return result;
   }
 
+  async getTasksAssignedTo(userId: string) {
+    return this.taskRepo.find({
+      where: { assigned_to: userId },
+      relations: ['board'],
+      order: { due_date: 'ASC', created_at: 'ASC' },
+    });
+  }
+
   // ─── Helpers ──────────────────────────────────────────────
 
   private async requireWorkspaceMember(workspaceId: string, userId: string) {

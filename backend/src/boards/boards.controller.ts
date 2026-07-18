@@ -108,6 +108,11 @@ export class BoardsController {
     return this.boardsService.createTask(dto, req.user.id);
   }
 
+  @Get('tasks/assigned-to-me')
+  getMyTasks(@Req() req: Request & { user: User }) {
+    return this.boardsService.getTasksAssignedTo(req.user.id);
+  }
+
   @Get('tasks/:id')
   getTask(@Param('id') id: string, @Req() req: Request & { user: User }) {
     return this.boardsService.getTask(id, req.user.id);

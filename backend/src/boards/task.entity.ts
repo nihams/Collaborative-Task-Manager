@@ -9,6 +9,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
+import { Board } from './board.entity';
 import { BoardColumn } from './board-column.entity';
 import { User } from '../users/user.entity';
 import { TaskLabel } from './task-label.entity';
@@ -58,6 +59,10 @@ export class Task {
 
   @Column({ default: 1000 })
   position!: number;
+
+  @ManyToOne(() => Board, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'board_id' })
+  board!: Board;
 
   @ManyToOne(() => BoardColumn, (column) => column.tasks, {
     onDelete: 'CASCADE',
