@@ -75,7 +75,13 @@ export class BoardsService {
   async getBoard(boardId: string, userId: string) {
     const board = await this.boardRepo.findOne({
       where: { id: boardId },
-      relations: ['columns', 'columns.tasks', 'columns.tasks.assignee'],
+      relations: [
+        'columns',
+        'columns.tasks',
+        'columns.tasks.assignee',
+        'columns.tasks.taskLabels',
+        'columns.tasks.taskLabels.label',
+      ],
     });
 
     if (!board) throw new NotFoundException('Board not found');
