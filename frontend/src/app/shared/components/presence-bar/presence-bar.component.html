@@ -1,0 +1,21 @@
+<div class="presence-bar">
+  @if (presentUsers().length === 0) {
+    <span class="presence-empty">No one else is here</span>
+  } @else {
+    <span class="presence-label">Online now</span>
+    <div class="avatar-stack">
+      @for (user of visible(); track user.id) {
+        <span class="avatar stacked" [title]="user.name" [style.background]="avatarColor(user.id)">
+          @if (user.avatar_url) {
+            <img [src]="user.avatar_url" [alt]="user.name" />
+          } @else {
+            {{ initials(user.name) }}
+          }
+        </span>
+      }
+      @if (overflow() > 0) {
+        <span class="avatar stacked more">+{{ overflow() }}</span>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,33 @@
+<div class="task-card">
+  @if (labels().length) {
+    <div class="label-row">
+      @for (l of labels(); track l.name) {
+        <span class="label-chip" [style.background]="l.color" [title]="l.name"></span>
+      }
+    </div>
+  }
+
+  <p class="task-title">{{ task.title }}</p>
+
+  <div class="task-meta">
+    <span class="prio-badge" [class]="priorityClass(task.priority)">{{ task.priority }}</span>
+
+    @if (task.due_date) {
+      <span class="due" [class.overdue]="isOverdue(task.due_date)">
+        ⏱ {{ formatDue(task.due_date) }}
+      </span>
+    }
+
+    <span class="spacer"></span>
+
+    @if (task.assignee) {
+      <span class="avatar small" [title]="task.assignee.name" [style.background]="avatarColor(task.assigned_to)">
+        @if (task.assignee.avatar_url) {
+          <img [src]="task.assignee.avatar_url" [alt]="task.assignee.name" />
+        } @else {
+          {{ initials(task.assignee.name) }}
+        }
+      </span>
+    }
+  </div>
+</div>

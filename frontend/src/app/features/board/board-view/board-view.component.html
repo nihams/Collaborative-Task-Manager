@@ -1,0 +1,157 @@
+<div class="board-page">
+  @if (loading()) {
+    <div class="board-toolbar">
+      <div class="skeleton sk-title"></div>
+    </div>
+    <div class="columns-scroll">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="column">
+          <div class="skeleton sk-col-head"></div>
+          <div class="skeleton sk-card"></div>
+          <div class="skeleton sk-card"></div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading() && board(); as b) {
+    <div class="board-toolbar">
+      <div class="toolbar-left">
+        <a [routerLink]="['/workspaces', b.workspace_id]" class="back-link">← Workspace</a>
+        @if (renamingBoard()) {
+          <input
+            class="board-rename-input"
+            [(ngModel)]="boardNameDraft"
+            (blur)="saveBoardName()"
+            (keydown.enter)="saveBoardName()"
+            (keydown.escape)="renamingBoard.set(false)"
+            autofocus
+          />
+        } @else {
+          <h1 (dblclick)="startRenameBoard()" title="Double-click to rename">
+            {{ b.name }}
+            <button class="rename-btn" title="Rename board" (click)="startRenameBoard()">✎</button>
+          </h1>
+        }
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-ghost share-btn" (click)="copyBoardLink()">
+          {{ linkCopied() ? 'Link copied ✓' : 'Share board' }}
+        </button>
+        <app-presence-bar [userIds]="otherPresentUserIds()" [members]="workspaceMembers()" />
+      </div>
+    </div>
+
+    @if (errors().length) {
+      <div class="api-error board-error">
+        @for (msg of errors(); track msg) {
+          <div>{{ msg }}</div>
+        }
+      </div>
+    }
+
+    <div class="columns-scroll" cdkDropListGroup>
+      @for (column of b.columns; track column.id) {
+        <div class="column">
+          <div class="column-head" [style.border-top-color]="column.color || 'var(--border)'">
+            @if (editingColumnId() === column.id) {
+              <input
+                class="column-name-input"
+                [(ngModel)]="columnNameDraft"
+                (blur)="saveColumnName(column)"
+                (keydown.enter)="saveColumnName(column)"
+                autofocus
+              />
+            } @else {
+              <h3 class="column-name" (dblclick)="startRenameColumn(column)" title="Double-click to rename">
+                {{ column.name }}
+                <span class="task-count">{{ column.tasks.length }}</span>
+              </h3>
+            }
+            <div class="column-actions">
+              <button class="icon-btn" title="Rename column" (click)="startRenameColumn(column)">✎</button>
+              <button class="icon-btn" title="Delete column" (click)="deleteColumn(column)">🗑</button>
+            </div>
+          </div>
+
+          <div
+            class="task-list"
+            cdkDropList
+            [id]="column.id"
+            [cdkDropListData]="column.tasks"
+            (cdkDropListDropped)="onTaskDrop($event)"
+          >
+            @for (task of column.tasks; track task.id) {
+              <div class="task-card-wrap" cdkDrag (click)="openTask(task)">
+                <app-task-card [task]="task" />
+              </div>
+            } @empty {
+              @if (addingTaskColumnId() !== column.id) {
+                <p class="column-empty">No tasks — drop one here or add below.</p>
+              }
+            }
+          </div>
+
+          @if (addingTaskColumnId() === column.id) {
+            <div class="add-task-form">
+              <textarea
+                [(ngModel)]="newTaskTitle"
+                placeholder="What needs doing?"
+                rows="2"
+                (keydown.enter)="$event.preventDefault(); addTask(column)"
+                autofocus
+              ></textarea>
+              <div class="add-task-actions">
+                <button class="btn btn-primary" (click)="addTask(column)" [disabled]="!newTaskTitle.trim()">Add task</button>
+                <button class="btn btn-ghost" (click)="cancelAddTask()">Cancel</button>
+              </div>
+            </div>
+          } @else {
+            <button class="add-task-btn" (click)="startAddTask(column.id)">+ Add task</button>
+          }
+        </div>
+      }
+
+      <!-- Add column -->
+      <div class="column add-column-slot">
+        @if (addingColumn()) {
+          <div class="add-column-form">
+            <input
+              [(ngModel)]="newColumnName"
+              placeholder="Column name"
+              (keydown.enter)="addColumn()"
+              autofocus
+            />
+            <div class="add-task-actions">
+              <button class="btn btn-primary" (click)="addColumn()" [disabled]="!newColumnName.trim()">Add column</button>
+              <button class="btn btn-ghost" (click)="addingColumn.set(false)">Cancel</button>
+            </div>
+          </div>
+        } @else {
+          <button class="add-column-btn" (click)="addingColumn.set(true)">+ Add column</button>
+        }
+      </div>
+    </div>
+  }
+
+  @if (!loading() && !board()) {
+    <div class="empty-state">
+      <div class="empty-icon">🚫</div>
+      <h3>Board not found</h3>
+      <p>This board may have been deleted, or you may not have access to it.</p>
+      <a routerLink="/workspaces" class="btn btn-primary">Back to workspaces</a>
+    </div>
+  }
+</div>
+
+@if (selectedTaskId(); as taskId) {
+  <app-task-detail
+    [taskId]="taskId"
+    [members]="workspaceMembers()"
+    [knownLabels]="knownLabels()"
+    (closed)="selectedTaskId.set(null)"
+    (taskUpdated)="onTaskUpdated($event)"
+    (taskDeleted)="onTaskDeleted($event)"
+    (labelsDiscovered)="onLabelsDiscovered($event)"
+  />
+}

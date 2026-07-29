@@ -1,0 +1,188 @@
+<div class="panel-backdrop" (click)="closed.emit()"></div>
+
+<aside class="panel">
+  <div class="panel-head">
+    <span class="panel-eyebrow">Task details</span>
+    <button class="btn btn-ghost close-btn" (click)="closed.emit()" aria-label="Close">✕</button>
+  </div>
+
+  @if (loading()) {
+    <div class="panel-body">
+      <div class="skeleton sk-title"></div>
+      <div class="skeleton sk-row"></div>
+      <div class="skeleton sk-block"></div>
+    </div>
+  }
+
+  @if (!loading() && task(); as t) {
+    <div class="panel-body">
+      @if (errors().length) {
+        <div class="api-error">
+          <ul>
+            @for (msg of errors(); track msg) {
+              <li>{{ msg }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <!-- Title: click to edit, blur to save -->
+      @if (editingTitle()) {
+        <input
+          class="title-input"
+          [(ngModel)]="titleDraft"
+          (blur)="saveTitle()"
+          (keydown.enter)="saveTitle()"
+          autofocus
+        />
+      } @else {
+        <h2 class="task-title" (click)="startTitleEdit()" title="Click to edit">{{ t.title }}</h2>
+      }
+
+      <div class="props">
+        <div class="prop">
+          <label>Priority</label>
+          <select [ngModel]="t.priority" (ngModelChange)="savePriority($event)">
+            @for (p of priorities; track p) {
+              <option [value]="p">{{ p }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="prop">
+          <label>Due date</label>
+          <input type="date" [(ngModel)]="dueDraft" (change)="saveDueDate()" />
+        </div>
+
+        <div class="prop">
+          <label>Assignee</label>
+          <select [ngModel]="t.assigned_to ?? ''" (ngModelChange)="saveAssignee($event)">
+            <option value="">Unassigned</option>
+            @for (member of members; track member.id) {
+              <option [value]="member.user_id">{{ member.user?.name ?? member.user_id }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="section">
+        <label>Description</label>
+        <textarea
+          [(ngModel)]="descriptionDraft"
+          (blur)="saveDescription()"
+          placeholder="Add a more detailed description…"
+        ></textarea>
+      </div>
+
+      <div class="section">
+        <label>Labels</label>
+        <div class="label-chips">
+          @for (tl of t.taskLabels ?? []; track tl.id) {
+            <span class="label-pill" [style.background]="tl.label.color">
+              {{ tl.label.name }}
+              <button class="pill-x" (click)="removeLabel(tl.label_id)" aria-label="Remove label">✕</button>
+            </span>
+          } @empty {
+            <span class="muted">No labels yet.</span>
+          }
+        </div>
+
+        @if (attachableLabels.length) {
+          <div class="label-attach">
+            <select [(ngModel)]="attachLabelId">
+              <option value="">Attach existing label…</option>
+              @for (label of attachableLabels; track label.id) {
+                <option [value]="label.id">{{ label.name }}</option>
+              }
+            </select>
+            <button class="btn btn-secondary" (click)="attachLabel()" [disabled]="!attachLabelId">Add</button>
+          </div>
+        }
+
+        @if (showLabelForm()) {
+          <div class="label-create">
+            <input [(ngModel)]="newLabelName" placeholder="Label name" maxlength="30" />
+            <input type="color" [(ngModel)]="newLabelColor" title="Label colour" />
+            <button class="btn btn-primary" (click)="createAndAttachLabel()" [disabled]="!newLabelName.trim()">Create</button>
+            <button class="btn btn-ghost" (click)="showLabelForm.set(false)">Cancel</button>
+          </div>
+        } @else {
+          <button class="btn btn-ghost add-label" (click)="showLabelForm.set(true)">+ New label</button>
+        }
+      </div>
+
+      <div class="section">
+        <label>Comments <span class="muted">({{ comments().length }})</span></label>
+        <div class="comments">
+          @for (comment of comments(); track comment.id) {
+            <div class="comment">
+              <span class="avatar small" [style.background]="avatarColor(comment.user_id)">
+                @if (comment.author.avatar_url) {
+                  <img [src]="comment.author.avatar_url" [alt]="comment.author.name" />
+                } @else {
+                  {{ initials(comment.author.name) }}
+                }
+              </span>
+              <div class="comment-content">
+                <div class="comment-meta">
+                  <span class="comment-author">{{ comment.author.name }}</span>
+                  <span class="comment-time">{{ formatDate(comment.created_at) }}</span>
+                </div>
+                <p class="comment-text">{{ comment.content }}</p>
+              </div>
+            </div>
+          } @empty {
+            <p class="muted">No comments yet. Start the conversation.</p>
+          }
+        </div>
+
+        <div class="comment-form">
+          <textarea
+            [(ngModel)]="commentDraft"
+            placeholder="Write a comment…"
+            rows="2"
+          ></textarea>
+          <button
+            class="btn btn-primary"
+            (click)="postComment()"
+            [disabled]="postingComment() || !commentDraft.trim()"
+          >
+            {{ postingComment() ? 'Posting…' : 'Comment' }}
+          </button>
+        </div>
+      </div>
+
+      @if (auditAvailable() && auditTrail().length) {
+        <div class="section">
+          <label>Activity</label>
+          <div class="audit">
+            @for (log of auditTrail(); track log.id) {
+              <div class="audit-row">
+                <span class="audit-dot"></span>
+                <span class="audit-text">
+                  <strong>{{ log.actor?.name ?? 'Someone' }}</strong>
+                  {{ humanizeAction(log.action) }}
+                  <span class="audit-time">· {{ formatDate(log.created_at) }}</span>
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="section meta-footer">
+        @if (t.creator) {
+          <span class="muted">Created by {{ t.creator.name }} · {{ formatDate(t.created_at) }}</span>
+        }
+      </div>
+
+      <button class="btn btn-danger delete-btn" (click)="deleteTask()">Delete task</button>
+    </div>
+  }
+
+  @if (!loading() && !task()) {
+    <div class="panel-body">
+      <p class="muted">Task could not be loaded.</p>
+    </div>
+  }
+</aside>

@@ -1,0 +1,140 @@
+.back-link {
+  color: var(--text-2);
+  text-decoration: none;
+  font-size: 13px;
+  &:hover { color: var(--text); }
+}
+
+.title-skeleton { height: 32px; width: 280px; margin-bottom: 20px; }
+.block-skeleton { height: 200px; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 12px 0 24px;
+
+  h1 { font-size: 22px; }
+  .page-sub { color: var(--text-2); font-size: 13.5px; margin: 4px 0 0; }
+}
+
+.form-card { padding: 20px; margin-bottom: 20px; max-width: 520px; }
+
+.section { margin-bottom: 36px; }
+
+.section h2 { font-size: 16px; margin-bottom: 14px; }
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+
+  h2 { margin-bottom: 0; }
+  .count { color: var(--text-3); font-weight: 500; margin-left: 4px; }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.board-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 500;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+
+  &:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+  .board-icon { color: var(--accent); font-size: 16px; }
+}
+
+.invite-form {
+  display: grid;
+  grid-template-columns: 1fr 140px auto;
+  gap: 12px;
+  align-items: end;
+
+  .field { margin-bottom: 0; }
+  .btn { height: 38px; }
+}
+
+@media (max-width: 640px) {
+  .invite-form { grid-template-columns: 1fr; }
+}
+
+.success-text { color: var(--success); font-size: 13px; margin: 0 0 12px; }
+
+.member-list { padding: 6px 0; }
+
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+
+  & + .member-row { border-top: 1px solid var(--border); }
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+
+  .member-name { font-weight: 500; font-size: 13.5px; }
+  .member-email { color: var(--text-3); font-size: 12px; }
+}
+
+.member-tasks { color: var(--text-2); font-size: 12.5px; white-space: nowrap; }
+
+.role-badge {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  padding: 3px 7px;
+  border-radius: 20px;
+  background: var(--surface-2);
+  color: var(--text-2);
+
+  &.owner { background: var(--accent-soft); color: var(--accent); }
+}
+
+.remove-btn { padding: 4px 8px; }
+
+.empty-inline { color: var(--text-2); padding: 12px 16px; margin: 0; }
+
+.rename-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rename-input {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 6px 10px;
+  max-width: 320px;
+}
+
+.rename-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  vertical-align: middle;
+
+  &:hover { background: var(--surface-2); color: var(--text); }
+}
+
+.board-skeleton { height: 56px; }

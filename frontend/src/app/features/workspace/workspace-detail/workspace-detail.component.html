@@ -1,0 +1,163 @@
+<div class="page">
+  @if (loading()) {
+    <div class="skeleton title-skeleton"></div>
+    <div class="skeleton block-skeleton"></div>
+  }
+
+  @if (!loading() && workspace(); as ws) {
+    <a routerLink="/workspaces" class="back-link">← All workspaces</a>
+
+    <div class="page-header">
+      <div>
+        @if (renaming()) {
+          <div class="rename-row">
+            <input
+              class="rename-input"
+              [(ngModel)]="renameDraft"
+              (keydown.enter)="saveRename()"
+              (keydown.escape)="renaming.set(false)"
+              autofocus
+            />
+            <button class="btn btn-primary" (click)="saveRename()">Save</button>
+            <button class="btn btn-ghost" (click)="renaming.set(false)">Cancel</button>
+          </div>
+          @if (renameErrors().length) {
+            <div class="api-error">
+              @for (msg of renameErrors(); track msg) { <div>{{ msg }}</div> }
+            </div>
+          }
+        } @else {
+          <h1>
+            {{ ws.name }}
+            @if (canManage()) {
+              <button class="rename-btn" title="Rename workspace" (click)="startRename()">✎</button>
+            }
+          </h1>
+        }
+        @if (ws.description) {
+          <p class="page-sub">{{ ws.description }}</p>
+        }
+      </div>
+      <button class="btn btn-primary" (click)="showBoardForm.set(!showBoardForm())">
+        {{ showBoardForm() ? 'Cancel' : '+ New board' }}
+      </button>
+    </div>
+
+    @if (showBoardForm()) {
+      <div class="card form-card">
+        @if (boardErrors().length) {
+          <div class="api-error">
+            <ul>
+              @for (msg of boardErrors(); track msg) {
+                <li>{{ msg }}</li>
+              }
+            </ul>
+          </div>
+        }
+        <form [formGroup]="boardForm" (ngSubmit)="createBoard()">
+          <div class="field">
+            <label for="board-name">Board name</label>
+            <input id="board-name" formControlName="name" placeholder="e.g. Sprint 24" />
+          </div>
+          <button class="btn btn-primary" type="submit" [disabled]="creatingBoard()">
+            {{ creatingBoard() ? 'Creating…' : 'Create board' }}
+          </button>
+        </form>
+      </div>
+    }
+
+    <section class="section">
+      <h2>Boards</h2>
+      @if (boardsLoading()) {
+        <div class="grid">
+          <div class="skeleton board-skeleton"></div>
+          <div class="skeleton board-skeleton"></div>
+        </div>
+      } @else if (boards().length === 0) {
+        <div class="empty-state card">
+          <div class="empty-icon">📋</div>
+          <h3>No boards here yet</h3>
+          <p>Create the first board for this workspace to get started.</p>
+        </div>
+      } @else {
+        <div class="grid">
+          @for (board of boards(); track board.id) {
+            <a class="board-card card" [routerLink]="['/board', board.id]">
+              <span class="board-icon">▤</span>
+              <span class="board-name">{{ board.name }}</span>
+            </a>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Members <span class="count">{{ ws.members?.length ?? 0 }}</span></h2>
+        @if (canManage()) {
+          <button class="btn btn-secondary" (click)="showInviteForm.set(!showInviteForm())">
+            {{ showInviteForm() ? 'Cancel' : '+ Invite member' }}
+          </button>
+        }
+      </div>
+
+      @if (showInviteForm() && canManage()) {
+        <div class="card form-card">
+          @if (inviteErrors().length) {
+            <div class="api-error">
+              <ul>
+                @for (msg of inviteErrors(); track msg) {
+                  <li>{{ msg }}</li>
+                }
+              </ul>
+            </div>
+          }
+          @if (inviteSuccess()) {
+            <p class="success-text">{{ inviteSuccess() }}</p>
+          }
+          <form [formGroup]="inviteForm" (ngSubmit)="invite()" class="invite-form">
+            <div class="field">
+              <label for="invite-email">Email</label>
+              <input id="invite-email" type="email" formControlName="email" placeholder="teammate@example.com" />
+            </div>
+            <div class="field">
+              <label for="invite-role">Role</label>
+              <select id="invite-role" formControlName="role">
+                <option value="MEMBER">Member</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" type="submit" [disabled]="inviting()">
+              {{ inviting() ? 'Inviting…' : 'Invite' }}
+            </button>
+          </form>
+        </div>
+      }
+
+      <div class="member-list card">
+        @for (member of ws.members ?? []; track member.id) {
+          <div class="member-row">
+            <span class="avatar" [style.background]="avatarColor(member.user_id)">
+              @if (member.user?.avatar_url) {
+                <img [src]="member.user?.avatar_url" [alt]="member.user?.name" />
+              } @else {
+                {{ initials(member.user?.name) }}
+              }
+            </span>
+            <div class="member-info">
+              <span class="member-name">{{ member.user?.name ?? member.user_id }}</span>
+              <span class="member-email">{{ member.user?.email }}</span>
+            </div>
+            <span class="member-tasks">{{ taskCountFor(member.user_id) }} open task{{ taskCountFor(member.user_id) === 1 ? '' : 's' }}</span>
+            <span class="role-badge" [class.owner]="member.role === 'OWNER'">{{ member.role }}</span>
+            @if (canManage() && member.role !== 'OWNER') {
+              <button class="btn btn-ghost remove-btn" title="Remove member" (click)="removeMember(member)">✕</button>
+            }
+          </div>
+        } @empty {
+          <p class="empty-inline">No members found.</p>
+        }
+      </div>
+    </section>
+  }
+</div>

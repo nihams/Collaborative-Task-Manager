@@ -1,0 +1,58 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>My Tasks</h1>
+      @if (!loading() && !error()) {
+        <p class="page-sub">
+          {{ totalCount() }} open task{{ totalCount() === 1 ? '' : 's' }} assigned to you
+          @if (overdueCount()) {
+            · <span class="overdue-count">{{ overdueCount() }} overdue</span>
+          }
+        </p>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton group-skeleton"></div>
+    <div class="skeleton group-skeleton"></div>
+  } @else if (error()) {
+    <div class="empty-state card">
+      <div class="empty-icon">⚠️</div>
+      <h3>Couldn't load your tasks</h3>
+      <p>The server may be unavailable, or the endpoint isn't deployed yet. Try again shortly.</p>
+    </div>
+  } @else if (groups().length === 0) {
+    <div class="empty-state card">
+      <div class="empty-icon">🎉</div>
+      <h3>Nothing assigned to you</h3>
+      <p>When teammates assign you tasks, they'll show up here grouped by board.</p>
+    </div>
+  } @else {
+    @for (group of groups(); track group.boardId) {
+      <section class="board-group">
+        <a class="group-head" [routerLink]="['/board', group.boardId]">
+          <span class="board-icon">▤</span>
+          {{ group.boardName }}
+          <span class="count">{{ group.tasks.length }}</span>
+        </a>
+        <div class="card task-list">
+          @for (task of group.tasks; track task.id) {
+            <a class="task-row" [routerLink]="['/board', task.board_id]">
+              <span class="task-title">{{ task.title }}</span>
+              <span class="prio-badge" [class]="priorityClass(task.priority)">{{ task.priority }}</span>
+              @if (task.due_date) {
+                <span class="due" [class.overdue]="isOverdue(task.due_date)">
+                  ⏱ {{ formatDue(task.due_date) }}
+                  @if (isOverdue(task.due_date)) { <em>overdue</em> }
+                </span>
+              } @else {
+                <span class="due none">No due date</span>
+              }
+            </a>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>

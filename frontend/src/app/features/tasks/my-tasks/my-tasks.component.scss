@@ -1,0 +1,53 @@
+.page-header { margin-bottom: 22px; h1 { font-size: 22px; } }
+.page-sub { color: var(--text-2); font-size: 13.5px; margin: 4px 0 0; }
+.overdue-count { color: var(--prio-urgent); font-weight: 600; }
+
+.group-skeleton { height: 120px; margin-bottom: 16px; }
+
+.board-group { margin-bottom: 26px; }
+
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  margin-bottom: 10px;
+
+  .board-icon { color: var(--accent); }
+  .count { color: var(--text-3); font-weight: 500; font-size: 12px; }
+  &:hover { color: var(--accent-hover); }
+}
+
+.task-list { padding: 4px 0; }
+
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--surface-2); }
+}
+
+.task-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.due {
+  color: var(--text-2);
+  font-size: 12.5px;
+  white-space: nowrap;
+
+  &.overdue {
+    color: var(--prio-urgent);
+    font-weight: 600;
+    em { font-style: normal; background: var(--prio-urgent-bg); border-radius: 4px; padding: 1px 6px; margin-left: 4px; font-size: 11px; }
+  }
+  &.none { color: var(--text-3); }
+}

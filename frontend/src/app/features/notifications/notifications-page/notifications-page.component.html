@@ -1,0 +1,31 @@
+<div class="page narrow">
+  <div class="page-header">
+    <h1>Notifications</h1>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton row-skeleton"></div>
+    <div class="skeleton row-skeleton"></div>
+    <div class="skeleton row-skeleton"></div>
+  } @else if (all().length === 0) {
+    <div class="empty-state card">
+      <div class="empty-icon">🔕</div>
+      <h3>You have no notifications</h3>
+      <p>Task assignments and workspace activity will land here.</p>
+    </div>
+  } @else {
+    <div class="card notif-list">
+      @for (n of all(); track n.id) {
+        <button class="notif-row" [class.unread]="!n.read" (click)="open(n)">
+          <span class="notif-icon">{{ icon(n.type) }}</span>
+          <span class="notif-body">
+            <span class="notif-title">{{ n.title }}</span>
+            <span class="notif-text">{{ n.body }}</span>
+          </span>
+          <span class="notif-time">{{ timeAgo(n.created_at) }}</span>
+          @if (!n.read) { <span class="dot"></span> }
+        </button>
+      }
+    </div>
+  }
+</div>

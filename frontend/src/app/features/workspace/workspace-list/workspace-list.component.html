@@ -1,0 +1,70 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Workspaces</h1>
+      <p class="page-sub">Everything you and your teams are working on.</p>
+    </div>
+    <button class="btn btn-primary" (click)="toggleCreate()">
+      {{ showCreateForm() ? 'Cancel' : '+ New workspace' }}
+    </button>
+  </div>
+
+  @if (showCreateForm()) {
+    <div class="card create-card">
+      @if (apiErrors().length) {
+        <div class="api-error">
+          <ul>
+            @for (msg of apiErrors(); track msg) {
+              <li>{{ msg }}</li>
+            }
+          </ul>
+        </div>
+      }
+      <form [formGroup]="createForm" (ngSubmit)="create()">
+        <div class="field">
+          <label for="ws-name">Name</label>
+          <input id="ws-name" formControlName="name" placeholder="e.g. Product Team" />
+        </div>
+        <div class="field">
+          <label for="ws-desc">Description <span class="optional">(optional)</span></label>
+          <input id="ws-desc" formControlName="description" placeholder="What is this workspace for?" />
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="creating()">
+          {{ creating() ? 'Creating…' : 'Create workspace' }}
+        </button>
+      </form>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="grid">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton ws-skeleton"></div>
+      }
+    </div>
+  } @else if (workspaces().length === 0) {
+    <div class="empty-state card">
+      <div class="empty-icon">🗂️</div>
+      <h3>No workspaces yet</h3>
+      <p>Create your first workspace to start organizing boards and tasks.</p>
+      <button class="btn btn-primary" (click)="toggleCreate()">+ New workspace</button>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (ws of workspaces(); track ws.id) {
+        <button class="ws-card card" (click)="open(ws)">
+          <div class="ws-top">
+            <h3>{{ ws.name }}</h3>
+            @if (ws.role) {
+              <span class="role-badge" [class.owner]="ws.role === 'OWNER'">{{ ws.role }}</span>
+            }
+          </div>
+          <p class="ws-desc">{{ ws.description || 'No description' }}</p>
+          @if (ws.members?.length) {
+            <p class="ws-meta">{{ memberCount(ws) }} member{{ memberCount(ws) === 1 ? '' : 's' }}</p>
+          }
+        </button>
+      }
+    </div>
+  }
+</div>

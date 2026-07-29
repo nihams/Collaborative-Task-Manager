@@ -1,0 +1,45 @@
+.narrow { max-width: 680px; }
+.page-header { margin-bottom: 20px; h1 { font-size: 22px; } }
+.row-skeleton { height: 62px; margin-bottom: 10px; }
+
+.notif-list { padding: 4px 0; }
+
+.notif-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 13px 16px;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--surface-2); }
+  &.unread { background: var(--accent-soft); &:hover { background: #dde5f0; } }
+}
+
+.notif-icon { font-size: 17px; }
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notif-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
+.notif-text { font-size: 12.5px; color: var(--text-2); }
+.notif-time { font-size: 11.5px; color: var(--text-3); white-space: nowrap; }
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}

@@ -1,0 +1,19 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/frontend/browser",
+  "rewrites": [
+    { "source": "/auth/:path*",          "destination": "https://YOUR-BACKEND.onrender.com/auth/:path*" },
+    { "source": "/workspaces",           "destination": "https://YOUR-BACKEND.onrender.com/workspaces" },
+    { "source": "/workspaces/:path*",    "destination": "https://YOUR-BACKEND.onrender.com/workspaces/:path*" },
+    { "source": "/boards/:path*",        "destination": "https://YOUR-BACKEND.onrender.com/boards/:path*" },
+    { "source": "/boards",               "destination": "https://YOUR-BACKEND.onrender.com/boards" },
+    { "source": "/columns/:path*",       "destination": "https://YOUR-BACKEND.onrender.com/columns/:path*" },
+    { "source": "/tasks/:path*",         "destination": "https://YOUR-BACKEND.onrender.com/tasks/:path*" },
+    { "source": "/tasks",                "destination": "https://YOUR-BACKEND.onrender.com/tasks" },
+    { "source": "/comments/:path*",      "destination": "https://YOUR-BACKEND.onrender.com/comments/:path*" },
+    { "source": "/notifications",        "destination": "https://YOUR-BACKEND.onrender.com/notifications" },
+    { "source": "/notifications/:path*", "destination": "https://YOUR-BACKEND.onrender.com/notifications/:path*" },
+    { "source": "/audit-log/:path*",     "destination": "https://YOUR-BACKEND.onrender.com/audit-log/:path*" },
+    { "source": "/(.*)",                 "destination": "/index.html" }
+  ]
+}

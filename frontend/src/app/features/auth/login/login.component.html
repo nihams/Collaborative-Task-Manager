@@ -1,0 +1,47 @@
+<div class="auth-page">
+  <div class="auth-card card">
+    <div class="auth-brand"><span class="brand-mark">▦</span> TaskFlow</div>
+    <h2>Welcome back</h2>
+    <p class="auth-sub">Log in to your account to continue.</p>
+
+    @if (apiErrors().length) {
+      <div class="api-error">
+        @if (apiErrors().length === 1) {
+          {{ apiErrors()[0] }}
+        } @else {
+          <ul>
+            @for (msg of apiErrors(); track msg) {
+              <li>{{ msg }}</li>
+            }
+          </ul>
+        }
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
+        @if (invalid('email')) {
+          <p class="error-text">Please enter a valid email address.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" />
+        @if (invalid('password')) {
+          <p class="error-text">Password is required.</p>
+        }
+      </div>
+
+      <button class="btn btn-primary full" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Logging in…' : 'Log in' }}
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Don't have an account? <a routerLink="/register">Create one</a>
+    </p>
+  </div>
+</div>

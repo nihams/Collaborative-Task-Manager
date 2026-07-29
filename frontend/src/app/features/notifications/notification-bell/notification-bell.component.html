@@ -1,0 +1,43 @@
+<div class="bell-wrap">
+  <button class="bell-btn" (click)="toggle()" aria-label="Notifications">
+    🔔
+    @if (notificationService.unreadCount() > 0) {
+      <span class="badge">{{ notificationService.unreadCount() > 99 ? '99+' : notificationService.unreadCount() }}</span>
+    }
+  </button>
+
+  @if (open()) {
+    <div class="dropdown card">
+      <div class="dropdown-head">
+        <h3>Notifications</h3>
+        @if (notificationService.unreadCount() > 0) {
+          <button class="mark-all" (click)="markAllRead()">Mark all as read</button>
+        }
+      </div>
+
+      <div class="dropdown-body">
+        @for (notification of notificationService.notifications(); track notification.id) {
+          <button
+            class="notif-row"
+            [class.unread]="!notification.read"
+            (click)="onNotificationClick(notification)"
+          >
+            <span class="notif-icon">{{ typeIcon(notification.type) }}</span>
+            <span class="notif-content">
+              <span class="notif-title">{{ notification.title }}</span>
+              <span class="notif-body">{{ notification.body }}</span>
+              <span class="notif-time">{{ relativeTime(notification.created_at) }}</span>
+            </span>
+            @if (!notification.read) {
+              <span class="unread-dot"></span>
+            }
+          </button>
+        } @empty {
+          <p class="notif-empty">You have no notifications</p>
+        }
+      </div>
+
+      <a class="view-all" routerLink="/notifications" (click)="open.set(false)">View all notifications</a>
+    </div>
+  }
+</div>

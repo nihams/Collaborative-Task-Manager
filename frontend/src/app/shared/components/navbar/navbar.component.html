@@ -1,0 +1,32 @@
+@if (authService.isAuthenticated()) {
+  <header class="navbar">
+    <a routerLink="/workspaces" class="brand">
+      <span class="brand-mark">▦</span>
+      TaskFlow
+    </a>
+
+    <nav class="nav-links">
+      <a routerLink="/workspaces" routerLinkActive="active">Workspaces</a>
+      <a routerLink="/my-tasks" routerLinkActive="active">My Tasks</a>
+    </nav>
+
+    <div class="nav-right">
+      <app-notification-bell />
+
+      @if (authService.currentUser(); as user) {
+        <div class="user-chip" [title]="user.email">
+          <span class="avatar" [style.background]="avatarColor(user.id)">
+            @if (user.avatar_url) {
+              <img [src]="user.avatar_url" [alt]="user.name" />
+            } @else {
+              {{ initials(user.name) }}
+            }
+          </span>
+          <span class="user-name">{{ user.name }}</span>
+        </div>
+      }
+
+      <button class="btn btn-ghost" (click)="logout()">Log out</button>
+    </div>
+  </header>
+}

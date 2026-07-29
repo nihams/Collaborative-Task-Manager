@@ -1,0 +1,130 @@
+.bell-wrap { position: relative; }
+
+.bell-btn {
+  position: relative;
+  background: transparent;
+  border: none;
+  font-size: 17px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+
+  &:hover { background: var(--surface-2); }
+}
+
+.badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--danger);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 340px;
+  max-height: 440px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+}
+
+.dropdown-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+
+  h3 { font-size: 13.5px; }
+}
+
+.mark-all {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover { text-decoration: underline; }
+}
+
+.dropdown-body { overflow-y: auto; }
+
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+
+  &:hover { background: var(--surface-2); }
+  &.unread { background: var(--accent-soft); &:hover { background: #dde5f0; } }
+  &:last-child { border-bottom: none; }
+}
+
+.notif-icon { font-size: 15px; margin-top: 1px; }
+
+.notif-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+
+  .notif-title { font-weight: 600; font-size: 13px; }
+  .notif-body { color: var(--text-2); font-size: 12.5px; }
+  .notif-time { color: var(--text-3); font-size: 11.5px; margin-top: 2px; }
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.notif-empty {
+  text-align: center;
+  color: var(--text-2);
+  padding: 28px 14px;
+  margin: 0;
+  font-size: 13px;
+}
+
+@media (max-width: 420px) {
+  .dropdown { width: 300px; }
+}
+
+.view-all {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  font-size: 12.5px;
+  color: var(--accent);
+  text-decoration: none;
+  border-top: 1px solid var(--border);
+
+  &:hover { background: var(--surface-2); }
+}

@@ -1,0 +1,55 @@
+<div class="auth-page">
+  <div class="auth-card card">
+    <div class="auth-brand"><span class="brand-mark">▦</span> TaskFlow</div>
+    <h2>Create your account</h2>
+    <p class="auth-sub">Start collaborating with your team in minutes.</p>
+
+    @if (apiErrors().length) {
+      <div class="api-error">
+        @if (apiErrors().length === 1) {
+          {{ apiErrors()[0] }}
+        } @else {
+          <ul>
+            @for (msg of apiErrors(); track msg) {
+              <li>{{ msg }}</li>
+            }
+          </ul>
+        }
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" type="text" formControlName="name" placeholder="Ada Lovelace" autocomplete="name" />
+        @if (invalid('name')) {
+          <p class="error-text">Name must be 2–50 characters.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="you@example.com" autocomplete="email" />
+        @if (invalid('email')) {
+          <p class="error-text">Please enter a valid email address.</p>
+        }
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password" placeholder="At least 8 characters" autocomplete="new-password" />
+        @if (invalid('password')) {
+          <p class="error-text">Password must be at least 8 characters.</p>
+        }
+      </div>
+
+      <button class="btn btn-primary full" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Creating account…' : 'Create account' }}
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Already have an account? <a routerLink="/login">Log in</a>
+    </p>
+  </div>
+</div>
